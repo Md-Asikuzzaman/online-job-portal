@@ -1,0 +1,76 @@
+// This is the Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL") // Make sure to set the correct database URL in your .env file
+}
+
+// Users table: stores both students and companies
+model User {
+  user_id        Int             @id @default(autoincrement())
+  email          String          @unique
+  password       String
+  name           String
+  role           Role // role will be 'student' or 'company'
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  studentProfile StudentProfile? // One-to-one relationship with student profile
+  companyProfile CompanyProfile? // One-to-one relationship with company profile
+}
+
+// Enum for roles to distinguish between 'student' and 'company'
+enum Role {
+  student
+  company
+}
+
+// StudentProfiles table: stores information specific to students
+model StudentProfile {
+  student_id      Int           @id @default(autoincrement())
+  user_id         Int           @unique
+  phone_number    String?
+  resume          String? // URL or file path to the student's resume
+  graduation_year Int
+  gpa             Float
+  user            User          @relation(fields: [user_id], references: [user_id])
+  Application     Application[]
+}
+
+// CompanyProfiles table: stores information specific to companies
+model CompanyProfile {
+  company_id   Int          @id @default(autoincrement())
+  user_id      Int          @unique
+  company_name String
+  industry     String
+  website      String?
+  location     String
+  user         User         @relation(fields: [user_id], references: [user_id])
+  JobListing   JobListing[]
+}
+
+// JobListings table: stores job listings posted by companies
+model JobListing {
+  job_id       Int            @id @default(autoincrement())
+  company_id   Int
+  title        String
+  description  String
+  location     String
+  salary       Float?
+  created_at   DateTime       @default(now())
+  company      CompanyProfile @relation(fields: [company_id], references: [company_id])
+  applications Application[]
+}
+
+// Applications table: stores student applications to jobs
+model Application {
+  application_id Int            @id @default(autoincrement())
+  student_id     Int
+  job_id         Int            @unique
+  applied_at     DateTime       @default(now())
+  student        StudentProfile @relation(fields: [student_id], references: [student_id])
+  job            JobListing     @relation(fields: [job_id], references: [job_id])
+}
