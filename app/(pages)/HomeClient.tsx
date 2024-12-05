@@ -69,6 +69,7 @@ const HomeClient: NextPage<Props> = ({ user }) => {
             <h2 className='text-2xl font-bold mb-5'>New Arrived Jobs:</h2>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
               {get_all_jobs?.map((job) => {
+
                 const isApplied = job.applications.find(
                   (app) => app.student_id === app.student.student_id
                 );
